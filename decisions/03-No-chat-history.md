@@ -6,7 +6,7 @@ Proposed
 
 ## Context
 
-Usually in chatbot implementations, the user would be able to have a back and forth with the chatbot. However, in this application the user is querying whether a news article is false 
+Usually in chatbot implementations, the user would be able to have a back and forth with the chatbot. However, in this application the user is querying whether a news article is false
 
 ## Decision
 
