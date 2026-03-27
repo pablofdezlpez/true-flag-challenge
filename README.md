@@ -6,6 +6,7 @@ The solution includes the ingestion of a csv file provided by true flag into a c
 
 The agent will receive a query of a possible fake claim in the form of text or image (or both). With this query the agent will retrieve relevant documents from chroma database in order to determine if the claim is known to be false or not. In addition to retrieving the information, the agent will access the url associated with the document to find an updated version as well as a review in the language of the user if possible. Furthermore, a second "judge" llm will verify the answer is accurate and no hallucinations occurred when answering the user.
 
+![system graph](pipeline_graph.png)
 
 ```
 trueflag-challenge/
@@ -47,7 +48,7 @@ You need a .env file with the GEMINI_API_KEY variable set to a valid API key.
 To ingest data from CSV into ChromaDB, run the following command:
 
 ```bash
-uv run --env-file .env python -m src.Database.indexer
+uv run --env-file .env python -m src.Database.indexer -d path/to/csv -o /path/toChroma
 ```
 
 This process can take several minutes.
@@ -57,5 +58,5 @@ This process can take several minutes.
 The recommended usage of the chatbot is through the user interface:
 
 ```bash
-uv run --env-file .env python -m src.Chatbot.user_interface
+uv run --env-file .env python -m src.Chatbot.user_interface -d path/to/chroma
 ```

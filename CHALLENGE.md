@@ -28,7 +28,7 @@ response using textual information from the provided ClaimReview documents[^1] a
 
 A fact-checking or misinformation verification process must be reliable, provide verifiable evidence, and reach a conclusion about its accuracy and precision. It is especially important that the system output provides accurate information in the generated response. Therefore, **the core value of the proposed solution should focus on the detection or mitigation of hallucinations and on robust evaluation** within a RAG framework. Proposals that contribute to improving model reliability, factual consistency, or evaluation methodology in these areas will be particularly valued.
 
-Please include a document (Markdown or PDF) explaining your reasoning process, assumptions, and technical decisions about the implemented proposal. Other proposals, approaches or ideas not implement could be discussed later. 
+Please include a document (Markdown or PDF) explaining your reasoning process, assumptions, and technical decisions about the implemented proposal. Other proposals, approaches or ideas not implement could be discussed later.
 
 [^1]: The provided ClaimReview documents are an extract of our claim review database with records including claim
 review, derived textual data as summary or keywords, and image that contextualize or complement the
