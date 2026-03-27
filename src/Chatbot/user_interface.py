@@ -1,0 +1,33 @@
+import gradio as gr
+from src.Chatbot.graph import run_pipeline
+import argparse
+
+
+def build_interface(dataset="chroma_db"):
+
+    def run(message, history):
+        image = message.get("image", None)
+        query = message.get("text", "")
+
+        response = run_pipeline(query, image, dataset=dataset)
+        return response["answer"]
+
+    return run
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Run the H-RAG chatbot interface.")
+    parser.add_argument(
+        "-d",
+        "--chroma_db_path",
+        type=str,
+        default="chroma_db",
+        help="Path to the ChromaDB database",
+    )
+    args = parser.parse_args()
+    run = build_interface(dataset=args.chroma_db_path)
+    gr.ChatInterface(
+        fn=run,
+        multimodal=True,
+        textbox=gr.MultimodalTextbox(file_types=["image"], sources=["upload"]),
+    ).launch()
