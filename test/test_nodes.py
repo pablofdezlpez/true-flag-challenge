@@ -1,4 +1,11 @@
-from src.Chatbot.nodes import State, generate_answer, rag_search, route_judge_answer
+from src.Chatbot.nodes import (
+    State,
+    generate_answer,
+    rag_search,
+    judge_answer,
+    have_judge_approved,
+    where_documents_found_retrieved,
+)
 from src.Database.retriever import Retriever
 import pytest
 from unittest.mock import Mock
@@ -17,7 +24,9 @@ def image_crescription_model():
 @pytest.fixture
 def agentic_model():
     mock_agent = Mock()
-    mock_agent.call.return_value = "An answer"
+    mock_agent.call.return_value = Mock(
+        candidates=[Mock(content=Mock(parts=[Mock(text="An answer")]))]
+    )
     return mock_agent
 
 
@@ -81,47 +90,58 @@ def test_generate_answer(state):
     assert updated_state.answer == "An answer"
 
 
-def test_route_judge_answer_approved(state):
+def test_route_judge_saves_response_and_reasoning(state):
     mocked_document = Mock()
     mocked_document.url = "url1"
     mocked_document.title = "title1"
     mocked_document.text = "text1"
     state.current_doc = mocked_document
-    next_node = route_judge_answer(state)
-    assert next_node == END
+    state = judge_answer(state)
+    assert state.judge_approve is True
+    assert state.judge_reasoning == "Reasoning for approval"
 
 
-def test_route_judge_answer_not_approved_with_more_docs(state):
-    mock_judge = Mock()
-    mock_judge.call.return_value = (False, "Reasoning for approval")
-    state.judge = mock_judge
-
-    mocked_document = Mock()
-    mocked_document.url = "url1"
-    mocked_document.title = "title1"
-    mocked_document.text = "text1"
+def test_have_judge_approved_not_approved_goes_to_next_doc(state):
+    state.judge_approve = False
+    state.judge_reasoning = "Reasoning for approval"
+    state.current_doc = Mock()
 
     mocked_document2 = Mock()
     mocked_document2.url = "url2"
     state.retrieved_docs = [mocked_document2]
-    state.current_doc = mocked_document
 
-    next_node = route_judge_answer(state)
-    assert next_node == "generate_answer"
+    next_node = have_judge_approved(state)
+    assert next_node is False
     assert state.current_doc.url == mocked_document2.url
 
 
-def test_route_judge_answer_not_approved_no_more_docs(state):
-    mock_judge = Mock()
-    mock_judge.call.return_value = (False, "Reasoning for disapproval")
-    state.judge = mock_judge
+def test_have_judge_approved_not_approved_no_more_docs(state):
+    state.judge_approve = False
+    state.judge_reasoning = "Reasoning for approval"
+    state.current_doc = Mock()
 
+    state.retrieved_docs = []
+    next_node = have_judge_approved(state)
+    assert next_node is True
+
+
+def test_have_judge_approved_approved_goes_to_end(state):
+    state.judge_approve = True
+    state.judge_reasoning = "Reasoning for approval"
+    state.current_doc = Mock()
+    next_node = have_judge_approved(state)
+    assert next_node is True
+
+
+def test_where_documents_found_retrieved(state):
     mocked_document = Mock()
     mocked_document.url = "url1"
     mocked_document.title = "title1"
     mocked_document.text = "text1"
-
-    state.retrieved_docs = []
     state.current_doc = mocked_document
-    next_node = route_judge_answer(state)
-    assert next_node == END
+    assert where_documents_found_retrieved(state) is True
+
+
+def test_where_documents_found_retrieved_no_docs(state):
+    state.current_doc = None
+    assert where_documents_found_retrieved(state) is False

@@ -24,7 +24,9 @@ class State:
     judge_reasoning: str = "Did not run the judge yet."
 
     # Final answer
-    answer: str = "After searching for relevant information, I was not able to find any credible sources that address the claim. Therefore, I cannot provide a definitive answer at this moment."
+    answer: str = (
+        "After searching for relevant information, I was not able to find any credible sources that address the claim. Therefore, I cannot provide a definitive answer at this moment."
+    )
 
 
 def rag_search(state: State) -> dict:
@@ -61,8 +63,8 @@ def generate_answer(state: State) -> State:
     query_text = state.query_text
     query_image = state.query_image_bytes
     answer = state.agent.call(query_text, doc, query_image)
-    state.answer = answer
-    print(f"Intermidiate answer generated: {answer}")
+    state.answer = answer.candidates[0].content.parts[0].text
+    print(f"Intermidiate answer generated: {state.answer}")
     return state
 
 
