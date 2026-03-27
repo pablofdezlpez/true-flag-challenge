@@ -1,3 +1,4 @@
+import PIL
 import gradio as gr
 from src.Chatbot.graph import run_pipeline
 import argparse
@@ -6,9 +7,10 @@ import argparse
 def build_interface(dataset="chroma_db"):
 
     def run(message, history):
-        image = message.get("image", None)
+        image_path = message.get("files", None)
+        with open(image_path[0], "rb") as image_file:
+            image = image_file.read()
         query = message.get("text", "")
-
         response = run_pipeline(query, image, dataset=dataset)
         return response["answer"]
 

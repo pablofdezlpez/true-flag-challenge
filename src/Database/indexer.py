@@ -231,20 +231,8 @@ if __name__ == "__main__":
         default="chroma_db",
         help="Path to the ChromaDB directory for storing embeddings",
     )
-    parser.add_argument(
-        "--no-resume",
-        action="store_true",
-        help="Disable resume mode and re-index every article.",
-    )
-    parser.add_argument(
-        "--fail-fast",
-        action="store_true",
-        help="Stop ingestion on first error instead of continuing.",
-    )
     args = parser.parse_args()
     indexer = Indexer(chroma_db_path=args.chroma_db_path)
     indexer.index_csv(
         args.csv_path,
-        resume=not args.no_resume,
-        continue_on_error=not args.fail_fast,
     )

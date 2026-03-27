@@ -1,9 +1,7 @@
-import base64
-import types
-
 from pydantic import BaseModel
 
 from google import genai
+from google.genai import types
 from google.genai.types import GenerateContentConfig
 from src.Chatbot.prompts import _ANSWER_JUDGE_SYSTEM, AGENT_SYSTEM_PROMPT
 
@@ -32,9 +30,8 @@ class Judge:
         ]
 
         if query_image:
-            image_bytes = base64.encode(query_image)
             message.append(
-                types.Part.from_bytes(data=image_bytes, mime_type="image/jpeg")
+                types.Part.from_bytes(data=query_image, mime_type="image/jpeg")
             )
         response = self.client.models.generate_content(
             model=self.model,
@@ -66,9 +63,8 @@ class AnswerAgent:
     ) -> str:
         message = [f"QUERY:\n{query_text}\n\nEVIDENCE:\n{evidence}"]
         if query_image:
-            image_bytes = base64.encode(query_image)
             message.append(
-                types.Part.from_bytes(data=image_bytes, mime_type="image/jpeg")
+                types.Part.from_bytes(data=query_image, mime_type="image/jpeg")
             )
 
         response = self.client.models.generate_content(

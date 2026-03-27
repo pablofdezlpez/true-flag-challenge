@@ -3,6 +3,6 @@ chroma_db
 .venv
 .vscode
 *.csv
-*pycache*
+__pycache__/
 *log
 *.jpg
