@@ -5,3 +5,4 @@ chroma_db
 *.csv
 *pycache*
 *log
+*.jpg
