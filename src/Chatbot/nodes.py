@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from typing import Optional
-from langgraph.graph import END
 
 from src.Chatbot.agents import AnswerAgent, Judge
 from src.Database.retriever import Retriever
@@ -25,9 +24,7 @@ class State:
     judge_reasoning: str = "Did not run the judge yet."
 
     # Final answer
-    answer: str = (
-        "After searching for relevant information, I was not able to find any credible sources that address the claim. Therefore, I cannot provide a definitive answer at this moment."
-    )
+    answer: str = "After searching for relevant information, I was not able to find any credible sources that address the claim. Therefore, I cannot provide a definitive answer at this moment."
 
 
 def rag_search(state: State) -> dict:
@@ -69,19 +66,7 @@ def generate_answer(state: State) -> State:
     return state
 
 
-def route_after_search(state: State) -> str:
-    """If we have candidate docs, start evaluating; otherwise go to no_answer."""
-    if state.current_doc:
-        return "generate_answer"
-    return END
-
-
-def route_judge_answer(state: State) -> dict:
-    """
-    Ask the judge whether the *current_doc* answers the user's query.
-
-    The judge evaluates a single document at a time.
-    """
+def judge_answer(state: State) -> State:
     print("judging answer")
 
     answer = state.answer
@@ -95,14 +80,32 @@ def route_judge_answer(state: State) -> dict:
 
     state.judge_approve = approve
     state.judge_reasoning = reasoning
+    return state
+
+
+def where_documents_found_retrieved(state: State) -> str:
+    """If we have candidate docs, start evaluating; otherwise go to no_answer."""
+    if state.current_doc:
+        return True
+    return False
+
+
+def have_judge_approved(state: State) -> dict:
+    """
+    Ask the judge whether the *current_doc* answers the user's query.
+
+    The judge evaluates a single document at a time.
+    """
+    approve = state.judge_approve
+    reasoning = state.judge_reasoning
 
     print(f"Judge decision: {'APPROVE' if approve else 'REJECT'} - {reasoning}")
     if approve:
-        return END
+        return True
     try:
         next_doc = state.retrieved_docs.pop()
         state.current_doc = next_doc
-        return "generate_answer"
+        return False
     except IndexError:
         state.answer = "After searching for relevant information, I was not able to find any credible sources that address the claim. Therefore, I cannot provide a definitive answer at this moment."
-        return END
+        return True

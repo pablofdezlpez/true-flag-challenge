@@ -10,7 +10,6 @@ from src.config import minimum_similarity
 
 
 class Retriever:
-
     def __init__(self, chroma_db_path: str | Path, k_candidates: int = 3) -> None:
         self.chroma = chromadb.PersistentClient(path=chroma_db_path)
         self._summaries = self.chroma.get_collection(name="summaries")

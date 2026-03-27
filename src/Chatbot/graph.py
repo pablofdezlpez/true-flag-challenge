@@ -1,17 +1,13 @@
-import asyncio
-import logging
-import sys
-import warnings
-
-from langgraph.graph import START, StateGraph
+from langgraph.graph import END, START, StateGraph
 
 from src.Chatbot.agents import AnswerAgent, Judge
 from src.Chatbot.nodes import (
     State,
     generate_answer,
+    judge_answer,
     rag_search,
-    route_judge_answer,
-    route_after_search,
+    have_judge_approved,
+    where_documents_found_retrieved,
 )
 from src.Database.retriever import Retriever
 from src.config import ANSWER_AGENT_MODEL, JUDGE_MODEL
@@ -27,25 +23,29 @@ def build_graph():
     # Register nodes
     graph.add_node("rag_search", rag_search)
     graph.add_node("generate_answer", generate_answer)
+    graph.add_node("judge_answer", judge_answer)
 
     # Linear edges
     graph.add_edge(START, "rag_search")
+    graph.add_edge("generate_answer", "judge_answer")
 
     # Conditional: after search, either start judging or go to no_answer
-    graph.add_conditional_edges("rag_search", route_after_search)
+    graph.add_conditional_edges(
+        "rag_search",
+        where_documents_found_retrieved,
+        {True: "generate_answer", False: END},
+    )
 
     # Conditional: after each document evaluation
-    graph.add_conditional_edges("generate_answer", route_judge_answer)
+    graph.add_conditional_edges(
+        "judge_answer", have_judge_approved, {True: END, False: "generate_answer"}
+    )
 
     return graph.compile()
 
 
-# Module-level singleton – compiled once and reused across Streamlit reruns
-pipeline = build_graph()
-
-
 def run_pipeline(
-    query_text: str, query_image_bytes: bytes | None, dataset: str
+    pipeline, query_text: str, query_image_bytes: bytes | None, dataset: str
 ) -> dict:
     """
     Execute the H-RAG pipeline for a user query.
@@ -71,5 +71,7 @@ if __name__ == "__main__":
     query_text = "What is the capital of France?"
     query_image_bytes = None  # Or load image bytes if testing image queries
     dataset = "chroma_db"
-    answer = run_pipeline(query_text, query_image_bytes, dataset)
+    pipeline = build_graph()
+    pipeline.get_graph().draw_mermaid_png(output_file_path="pipeline_graph.png")
+    answer = run_pipeline(pipeline, query_text, query_image_bytes, dataset)
     print("Final Answer:", answer)
