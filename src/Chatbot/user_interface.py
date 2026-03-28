@@ -1,4 +1,3 @@
-import PIL
 import gradio as gr
 from src.Chatbot.graph import build_graph, run_pipeline
 import argparse

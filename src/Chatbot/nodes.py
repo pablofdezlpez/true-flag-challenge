@@ -66,7 +66,7 @@ def generate_answer(state: State) -> State:
     query_image = state.query_image_bytes
     answer = state.agent.call(query_text, doc, query_image)
     state.answer = answer.candidates[0].content.parts[0].text
-    print(f"Intermidiate answer generated: {state.answer}")
+    print(f"Intermediate answer generated: {state.answer}")
     return state
 
 
