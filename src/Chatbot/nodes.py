@@ -1,3 +1,5 @@
+import numpy as np
+
 from dataclasses import dataclass
 from typing import Optional
 
@@ -42,7 +44,7 @@ def rag_search(state: State) -> dict:
     image_query = state.query_image_bytes
     text_query = state.query_text
 
-    if image_query:
+    if isinstance(image_query, np.ndarray):
         retrieved_docs = retriever.query_by_image(image_query)
     else:
         retrieved_docs = retriever.query_by_text(text_query)
@@ -77,7 +79,7 @@ def judge_answer(state: State) -> State:
     user_query_image = state.query_image_bytes
 
     approve, reasoning = state.judge.call(
-        user_query, evidence=document, answer=answer, query_image=user_query_image
+        user_query, doc=document, answer=answer, query_image=user_query_image
     )
 
     state.judge_approve = approve

@@ -7,8 +7,11 @@ import argparse
 def build_interface(dataset="chroma_db"):
     def run(message, history):
         image_path = message.get("files", None)
-        with open(image_path[0], "rb") as image_file:
-            image = image_file.read()
+        if image_path:
+            with open(image_path[0], "rb") as image_file:
+                image = image_file.read()
+        else:
+            image = None
         query = message.get("text", "")
         pipeline = build_graph()
         response = run_pipeline(pipeline, query, image, dataset=dataset)

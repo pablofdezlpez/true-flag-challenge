@@ -11,6 +11,11 @@ class JudgeAnswer(BaseModel):
     reasoning: str
 
 
+def doc_to_evidence(document: dict) -> str:
+    """Convert a document metadata dictionary to an evidence string."""
+    return f"Title: {document.get('title', '')}\nSummary: {document.get('summary', '')}\nText: {document.get('text', '')}\nURL: {document.get('url', '')}"
+
+
 class Judge:
     """LLM-based judge that evaluates the quality of retrieved evidence and generated answers."""
 
@@ -21,10 +26,11 @@ class Judge:
     def call(
         self,
         query_text: str,
-        evidence: str,
+        doc: dict,
         answer: str,
         query_image: bytes | None = None,
     ) -> tuple[bool, str]:
+        evidence = doc_to_evidence(doc)
         message = [
             f"QUERY:\n{query_text}\n\nEVIDENCE:\n{evidence}\n\nGENERATED ANSWER:\n{answer}"
         ]
@@ -58,9 +64,8 @@ class AnswerAgent:
         self.tools = [{"url_context": {}}]
         self.model = model
 
-    def call(
-        self, query_text: str, evidence: str, query_image: bytes | None = None
-    ) -> str:
+    def call(self, query_text: str, doc: dict, query_image: bytes | None = None) -> str:
+        evidence = doc_to_evidence(doc)
         message = [f"QUERY:\n{query_text}\n\nEVIDENCE:\n{evidence}"]
         if query_image:
             message.append(
