@@ -4538,7 +4538,6 @@ dependencies = [
     { name = "lxml" },
     { name = "open-clip-torch" },
     { name = "opencv-python" },
-    { name = "pillow" },
 ]
 
 [package.dev-dependencies]
@@ -4563,7 +4562,6 @@ requires-dist = [
     { name = "lxml", specifier = ">=6.0.2" },
     { name = "open-clip-torch", specifier = ">=3.3.0" },
     { name = "opencv-python", specifier = ">=4.13.0.92" },
-    { name = "pillow", specifier = ">=12.1.1" },
 ]
 
 [package.metadata.requires-dev]
