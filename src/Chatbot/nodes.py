@@ -26,9 +26,7 @@ class State:
     judge_reasoning: str = "Did not run the judge yet."
 
     # Final answer
-    answer: str = (
-        "After searching for relevant information, I was not able to find any credible sources that address the claim. Therefore, I cannot provide a definitive answer at this moment."
-    )
+    answer: str = "After searching for relevant information, I was not able to find any credible sources that address the claim. Therefore, I cannot provide a definitive answer at this moment."
 
 
 def rag_search(state: State) -> dict:

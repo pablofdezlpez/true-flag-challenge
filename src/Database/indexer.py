@@ -63,30 +63,32 @@ class Indexer:
                 cr_image = row["cr_image"]
                 meta_image = row["meta_image"]
                 url = row["url"]
-                batch['article_id'].append(article_id)
-                batch['metadata'].append({
-                    "title": title,
-                    "summary": summary,
-                    "text": text,
-                    "cr_image": cr_image,
-                    "meta_image": meta_image,
-                    "url": url,
-                })
-                batch['documents'].append(summary)
-                if len(batch['article_id']) >= batch_size:
+                batch["article_id"].append(article_id)
+                batch["metadata"].append(
+                    {
+                        "title": title,
+                        "summary": summary,
+                        "text": text,
+                        "cr_image": cr_image,
+                        "meta_image": meta_image,
+                        "url": url,
+                    }
+                )
+                batch["documents"].append(summary)
+                if len(batch["article_id"]) >= batch_size:
                     self._summaries.upsert(
-                        ids=batch['article_id'],
-                        documents=batch['documents'],
-                        metadatas=batch['metadata'],
+                        ids=batch["article_id"],
+                        documents=batch["documents"],
+                        metadatas=batch["metadata"],
                     )
                     batch = {"article_id": [], "metadata": [], "documents": []}
                 print("[%s/%s] Indexing: %s", idx + 1, title[:80])
-            else: # If any remaining articles in batch after loop, index them as well
-                if batch['article_id']:
+            else:  # If any remaining articles in batch after loop, index them as well
+                if batch["article_id"]:
                     self._summaries.upsert(
-                        ids=batch['article_id'],
-                        documents=batch['documents'],
-                        metadatas=batch['metadata'],
+                        ids=batch["article_id"],
+                        documents=batch["documents"],
+                        metadatas=batch["metadata"],
                     )
 
 
