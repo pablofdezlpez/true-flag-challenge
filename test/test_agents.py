@@ -18,4 +18,9 @@ def test_answer_agent_calls_tool():
         query_text="What is this library used for?",
         evidence="https://docs.python.org/3/library/unittest.mock.html",
     )
-¡    assert answer.candidates[0].url_context_metadata.dict()['url_metadata'][0]['retrieved_url'] == "https://docs.python.org/3/library/unittest.mock.html", "AnswerAgent should call the url_context tool with the correct URL"
+    assert (
+        answer.candidates[0].url_context_metadata.dict()["url_metadata"][0][
+            "retrieved_url"
+        ]
+        == "https://docs.python.org/3/library/unittest.mock.html"
+    ), "AnswerAgent should call the url_context tool with the correct URL"
