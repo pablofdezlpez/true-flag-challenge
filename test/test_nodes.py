@@ -13,15 +13,6 @@ from langgraph.graph import END
 
 
 @pytest.fixture
-def image_crescription_model():
-    mock_model = Mock()
-    mock_response = Mock()
-    mock_response.content = "An image"
-    mock_model.invoke.return_value = mock_response
-    return mock_model
-
-
-@pytest.fixture
 def agentic_model():
     mock_agent = Mock()
     mock_agent.call.return_value = Mock(
