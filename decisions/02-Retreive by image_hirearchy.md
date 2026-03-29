@@ -2,7 +2,7 @@
 
 ## Status
 
-Proposed
+Rejected
 
 ## Context
 
@@ -17,3 +17,7 @@ When querying with text (or if image is not found) the system will first query b
 ## Consequences
 
 This querying process might be slow if images are not relevant, since it will pass three times. But it is expected to yield more accurate documentation
+
+# Rejection
+
+After implementation, we have noticed that indexing by summary, image and chunks was extremely slow (hours) plus querying image vs image would only hinder the system, since the summaries of the articles give the full information

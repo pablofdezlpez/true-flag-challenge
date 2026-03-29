@@ -1,16 +1,23 @@
 import pytest
-import numpy as np
-
-from src.Database.retriever import Retriever
+from src.database import Database as Indexer
 
 
 @pytest.fixture
-def retriever():
-    return Retriever("chroma_db")
+def retriever(tmp_path_factory):
+    fn = tmp_path_factory.mktemp("test_chroma_db")
+    return Indexer(str(fn))
+
+
+def test_indexer_index_once_per_summary(retriever):
+    retriever.index_csv("test/test_data.csv")
+
+    collection = retriever._client.get_collection("summaries")
+
+    assert len(retriever._client.list_collections()) == 1
+    assert collection.count() == 5
 
 
 def test_retriever_query_text(retriever):
-    fake_embedding = [np.zeros(3072)]
 
     query_text = "What is the capital of France?"
     evidence = retriever.query_by_text(query_text)
@@ -19,7 +26,6 @@ def test_retriever_query_text(retriever):
 
 
 def test_retriever_query_image(retriever):
-    fake_embedding = np.zeros(3072)
 
     image_path = "test/test.jpg"
     with open(image_path, "rb") as f:

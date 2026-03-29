@@ -1,4 +1,4 @@
-from src.Chatbot.nodes import (
+from src.nodes import (
     State,
     generate_answer,
     rag_search,
@@ -6,7 +6,7 @@ from src.Chatbot.nodes import (
     have_judge_approved,
     where_documents_found_retrieved,
 )
-from src.Database.retriever import Retriever
+from src.database import Database as Retriever
 import pytest
 from unittest.mock import Mock
 from langgraph.graph import END
@@ -42,7 +42,7 @@ def state(retriever, judge, agentic_model):
         retrieved_docs=None,
         current_doc=None,
         judge=judge,
-        judge_approve="",
+        judge_approve=False,
         judge_reasoning="",
         agent=agentic_model,
         answer="",

@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from google import genai
 from google.genai import types
 from google.genai.types import GenerateContentConfig
-from src.Chatbot.prompts import _ANSWER_JUDGE_SYSTEM, AGENT_SYSTEM_PROMPT
+from src.prompts import _ANSWER_JUDGE_SYSTEM, AGENT_SYSTEM_PROMPT
 
 
 class JudgeAnswer(BaseModel):

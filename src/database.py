@@ -1,44 +1,20 @@
 import argparse
 import csv
+import cv2
+import numpy as np
 import logging
 import chromadb
 from pathlib import Path
-from langchain_text_splitters import RecursiveCharacterTextSplitter
 from chromadb.utils.embedding_functions import OpenCLIPEmbeddingFunction
-
-from src.config import chunk_size, chunk_overlap
+from src.config import K_NEIGHBORS, CHROMA_BATCH
 
 logger = logging.getLogger(__name__)
 
-CHROMA_BATCH_LIMIT = 5_000
-MAX_METADATA_TEXT_LEN = 5_000  # ChromaDB ~32 KB metadata limit
 
-# Special characters required for non latin languages, as well as zero-width space to prevent empty chunks after splitting
-TEXT_SPLITTER = RecursiveCharacterTextSplitter(
-    chunk_size=chunk_size,
-    chunk_overlap=chunk_overlap,
-    separators=[
-        "\n\n",
-        "\n",
-        " ",
-        ".",
-        ",",
-        "\u200b",
-        "\uff0c",
-        "\u3001",
-        "\uff0e",
-        "\u3002",
-        "",
-    ],
-)
-
-
-class Indexer:
+class Database:
     """Ingests a CSV of articles into three ChromaDB collections: summaries, text_chunk and images
     images are taken from cr_images or defaulted to meta_images
     """
-
-    # TODO: Late realization of improvement, I should have planned for batch indexing of the documents to accelerate the process.
 
     def __init__(self, chroma_db_path: str | Path) -> None:
         db_path = Path(chroma_db_path)
@@ -48,12 +24,12 @@ class Indexer:
         self._summaries = self._client.get_or_create_collection(
             name="summaries", embedding_function=OpenCLIPEmbeddingFunction()
         )
+        self.k_candidates = K_NEIGHBORS
 
     def index_csv(self, csv_path: str | Path) -> None:
         """Read a CSV and index all articles into ChromaDB."""
         with open(csv_path, "r", encoding="utf-8") as csv_file:
             reader = csv.DictReader(csv_file)
-            batch_size = 500
             batch = {"article_id": [], "metadata": [], "documents": []}
             for idx, row in enumerate(reader):
                 article_id = f"article_{idx}"
@@ -75,7 +51,7 @@ class Indexer:
                     }
                 )
                 batch["documents"].append(summary)
-                if len(batch["article_id"]) >= batch_size:
+                if len(batch["article_id"]) >= CHROMA_BATCH:
                     self._summaries.upsert(
                         ids=batch["article_id"],
                         documents=batch["documents"],
@@ -90,6 +66,38 @@ class Indexer:
                         documents=batch["documents"],
                         metadatas=batch["metadata"],
                     )
+
+    # Retrieval function
+    def query_by_image(
+        self,
+        query: bytes,
+    ) -> list[str]:
+        """Retrieve relevant documents based on an image query.
+        Query is done against image embeddings in the "images" collection"""
+        query = cv2.imdecode(np.frombuffer(query, np.uint8), -1)
+        summary_results = self._summaries.query(
+            query_images=[query],
+            n_results=self.k_candidates,  # Over-fetch to have more pool
+            include=["metadatas"],
+        )
+        print(f"Found {len(summary_results['metadatas'][0])} summary matches")
+        return summary_results["metadatas"][0]
+
+    def query_by_text(
+        self,
+        query: str,
+    ) -> list[str]:
+        """Retrieve relevant documents based on a text query.
+        Query is done hierarchical way: first against summary, then against text chunks of matched articles
+        """
+
+        summary_results = self._summaries.query(
+            query_texts=[query],
+            n_results=self.k_candidates,  # Over-fetch to have more pool
+            include=["metadatas"],
+        )
+        print(f"Found {len(summary_results['metadatas'][0])} summary matches")
+        return summary_results["metadatas"][0]
 
 
 if __name__ == "__main__":
@@ -111,7 +119,11 @@ if __name__ == "__main__":
         help="Path to the ChromaDB directory for storing embeddings",
     )
     args = parser.parse_args()
-    indexer = Indexer(chroma_db_path=args.chroma_db_path)
+    indexer = Database(chroma_db_path=args.chroma_db_path)
     indexer.index_csv(
         args.csv_path,
     )
+    query = "Does X cure illnesses?"
+    results = indexer.query_by_text(query)
+    for result in results:
+        print(result)

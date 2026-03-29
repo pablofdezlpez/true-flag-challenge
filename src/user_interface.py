@@ -1,5 +1,5 @@
 import gradio as gr
-from src.Chatbot.graph import build_graph, run_pipeline
+from src.graph import build_graph, run_pipeline
 import argparse
 
 

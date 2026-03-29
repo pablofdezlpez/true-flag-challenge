@@ -1,4 +1,4 @@
-from src.Chatbot.agents import AnswerAgent, Judge
+from src.agents import AnswerAgent, Judge
 
 
 def test_judge_response_correct_types():

@@ -1,7 +1,7 @@
 from langgraph.graph import END, START, StateGraph
 
-from src.Chatbot.agents import AnswerAgent, Judge
-from src.Chatbot.nodes import (
+from src.agents import AnswerAgent, Judge
+from src.nodes import (
     State,
     generate_answer,
     judge_answer,
@@ -9,7 +9,7 @@ from src.Chatbot.nodes import (
     have_judge_approved,
     where_documents_found_retrieved,
 )
-from src.Database.retriever import Retriever
+from src.database import Database as Retriever
 from src.config import ANSWER_AGENT_MODEL, JUDGE_MODEL
 
 judge = Judge(model=JUDGE_MODEL)
