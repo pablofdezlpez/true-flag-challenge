@@ -46,7 +46,7 @@ You need a .env file with the GEMINI_API_KEY variable set to a valid API key. Ad
 To ingest data from CSV into ChromaDB, run the following command:
 
 ```bash
-uv run --env-file .env python -m src.Database.indexer -d path/to/csv -o /path/toChroma
+uv run --env-file .env python -m src.database -i path/to/csv -o /path/toChroma
 ```
 
 This process can take several minutes.
@@ -56,7 +56,7 @@ This process can take several minutes.
 The recommended usage of the chatbot is through the user interface:
 
 ```bash
-uv run --env-file .env python -m src.Chatbot.user_interface -d path/to/chroma
+uv run --env-file .env python -m src.user_interface -d path/to/chroma
 ```
 
 The chatbot allows for queries on images and texts.

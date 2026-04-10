@@ -58,14 +58,14 @@ class Database:
                         metadatas=batch["metadata"],
                     )
                     batch = {"article_id": [], "metadata": [], "documents": []}
-                print("[%s/%s] Indexing: %s", idx + 1, title[:80])
-            else:  # If any remaining articles in batch after loop, index them as well
-                if batch["article_id"]:
-                    self._summaries.upsert(
-                        ids=batch["article_id"],
-                        documents=batch["documents"],
-                        metadatas=batch["metadata"],
-                    )
+                print(f"[{idx + 1}] Indexing: {title[:80]}")
+            if batch["article_id"]: 
+                # If any remaining articles in batch after loop, index them as well
+                self._summaries.upsert(
+                    ids=batch["article_id"],
+                    documents=batch["documents"],
+                    metadatas=batch["metadata"],
+                )
 
     # Retrieval function
     def query_by_image(
@@ -105,7 +105,7 @@ if __name__ == "__main__":
         description="Index articles from CSV into ChromaDB"
     )
     parser.add_argument(
-        "-d",
+        "-i",
         "--csv_path",
         type=str,
         default="claim_matching_dataset.csv",
